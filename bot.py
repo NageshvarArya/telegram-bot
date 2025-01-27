@@ -20,9 +20,6 @@ logger = logging.getLogger(__name__)
 # Telegram channel link
 CHANNEL_LINK = "https://t.me/collagecampus"
 
-# Track whether the user has joined the channel
-user_joined_channel = set()
-
 # Function to extract Instagram video URL
 def download_instagram_video(instagram_url):
     try:
@@ -42,6 +39,7 @@ def download_instagram_video(instagram_url):
 async def is_user_in_channel(user_id: int, context: CallbackContext) -> bool:
     try:
         chat_member = await context.bot.get_chat_member('@collagecampus', user_id)
+        logger.info(f"User {user_id} status in channel: {chat_member.status}")  # Log the status
         return chat_member.status in ['member', 'administrator', 'creator']
     except Exception as e:
         logger.warning(f"Error checking user channel membership: {e}")
@@ -73,20 +71,19 @@ async def process_request(update: Update, context: CallbackContext):
     message_text = update.message.text
 
     # Check if the user has joined the channel
-    if user_id not in user_joined_channel:
-        if not await is_user_in_channel(user_id, context):
-            keyboard = [
-                [
-                    InlineKeyboardButton("Join Our Telegram Channel", url=CHANNEL_LINK)
-                ]
+    if not await is_user_in_channel(user_id, context):
+        keyboard = [
+            [
+                InlineKeyboardButton("Join Our Telegram Channel", url=CHANNEL_LINK)
             ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.message.reply_text(
-                "You need to join our Telegram channel to download videos!\n"
-                "Please join the channel and send the link again.",
-                reply_markup=reply_markup
-            )
-            return
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(
+            "You need to join our Telegram channel to download videos!\n"
+            "Please join the channel and send the link again.",
+            reply_markup=reply_markup
+        )
+        return
 
     # Process Instagram link
     instagram_url_regex = r"(https?://(?:www\.)?instagram\.com/(?:p|reel)/[\w-]+)/"
