@@ -24,8 +24,7 @@ CHANNEL_LINK = "https://t.me/collagecampus"
 # Function to extract Instagram video URL
 def download_instagram_video(instagram_url):
     try:
-        # Adjust regex to strip any query parameters before processing
-        shortcode_match = re.findall(r'instagram.com/(?:p|reel)/([a-zA-Z0-9-_]+)', instagram_url.split('?')[0])
+        shortcode_match = re.findall(r'instagram.com/(?:p|reel)/([a-zA-Z0-9-_]+)', instagram_url)
         if not shortcode_match:
             return None
         shortcode = shortcode_match[0]
@@ -43,6 +42,14 @@ async def is_user_in_channel(user_id: int, context: CallbackContext) -> bool:
     except Exception as e:
         return False
 
+# Function to store user data
+def store_user_data(user_id, username, mobile_number=None):
+    # Here you can define how to store the data (e.g., save to a database or file)
+    logger.info(f"Storing data for User ID: {user_id}, Username: {username}, Mobile: {mobile_number}")
+    # Example: Save the data to a text file (you can modify this based on your requirements)
+    with open("user_data.txt", "a") as file:
+        file.write(f"User ID: {user_id}, Username: {username}, Mobile: {mobile_number}\n")
+
 async def start(update: Update, context: CallbackContext):
     keyboard = [[InlineKeyboardButton("Join Our Telegram Channel", url=CHANNEL_LINK)]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -57,6 +64,10 @@ async def process_request(update: Update, context: CallbackContext):
     user_id = update.message.from_user.id
     username = update.message.from_user.username
     message_text = update.message.text
+    mobile_number = update.message.contact.phone_number if update.message.contact else None
+
+    # Store user data
+    store_user_data(user_id, username, mobile_number)
     
     if not await is_user_in_channel(user_id, context):
         keyboard = [[InlineKeyboardButton("Join Our Telegram Channel", url=CHANNEL_LINK)]]
@@ -83,11 +94,11 @@ async def broadcast(update: Update, context: CallbackContext):
         return
     
     message = " ".join(context.args)
-    # Assuming a list of user IDs is already available
-    users = []  # Replace with actual list of user IDs
-    for user in users:
+    # Assuming you have a list of user IDs to send the broadcast
+    user_ids = [123456789, 987654321]  # Example user IDs
+    for user_id in user_ids:
         try:
-            await context.bot.send_message(chat_id=user, text=message)
+            await context.bot.send_message(chat_id=user_id, text=message)
         except:
             continue
 
