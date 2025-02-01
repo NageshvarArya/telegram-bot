@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Ignore Python bytecode files
 __pycache__/
 *.pyc
@@ -14,3 +15,19 @@ venv/
 
 # Ignore OS-specific files (MacOS)
 .DS_Store
+=======
+# Ignore environment files
+.env
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore virtual environment folders
+venv/
+
+# Ignore other unnecessary files
+.DS_Store
+
+Music - Shortcut.lnk
+>>>>>>> 63d00f4872f960a03d2ed7a9b0e3f706ff48b298
